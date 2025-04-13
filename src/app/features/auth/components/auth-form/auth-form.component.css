@@ -1,0 +1,27 @@
+.container {
+  border: 2px solid #000000;
+  border-radius: 0.8rem;
+  padding: 1rem;
+  background-color: #ffffff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  width: 15rem;
+
+  .titles {
+    text-align: center;
+  }
+
+  .form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .auth-switch {
+    text-decoration: underline;
+    text-align: center;
+
+    &:hover {
+      cursor: pointer;
+    }
+  }
+}

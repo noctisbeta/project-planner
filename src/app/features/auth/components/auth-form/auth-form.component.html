@@ -1,0 +1,33 @@
+<div class="container">
+  <div class="titles">
+    <h1>Welcome</h1>
+    @if (isSignIn) {
+    <h2>Sign In</h2>
+    } @else {
+    <h2>Sign Up</h2>
+    }
+  </div>
+
+  <form class="form-container" [formGroup]="authForm" (ngSubmit)="onSubmit()">
+    <label for="email">Email</label>
+    <input type="text" id="email" name="email" formControlName="email" />
+
+    <label for="password">Password</label>
+    <input
+      type="password"
+      id="password"
+      name="password"
+      formControlName="password"
+    />
+
+    <button type="submit" [disabled]="authForm.invalid">Submit</button>
+  </form>
+
+  <div class="auth-switch" (click)="toggleAuthMode()">
+    @if (isSignIn) {
+    <p>Need an account? Sign up</p>
+    } @else {
+    <p>Already have an account? Sign in</p>
+    }
+  </div>
+</div>

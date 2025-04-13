@@ -1,0 +1,7 @@
+.container {
+  display: grid;
+  place-items: center;
+  height: 100vh;
+
+  background: linear-gradient(to right, #ff7e5f, #feb47b);
+}

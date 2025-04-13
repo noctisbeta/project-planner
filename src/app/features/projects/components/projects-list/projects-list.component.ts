@@ -12,9 +12,11 @@ export class ProjectsListComponent {
 
   readonly projectsSignal = this.projectsService.projectsSignal;
 
-  async ngOnInit() {
-    // this.projects = await this.projectsService.getProjects();
-    // console.log(this.projects);
-    console.log(this.projectsSignal());
+  async onDeleteProject(id: string): Promise<void> {
+    try {
+      await this.projectsService.deleteProject(id);
+    } catch (error) {
+      console.error('Error deleting project:', error);
+    }
   }
 }

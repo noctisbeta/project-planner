@@ -1,5 +1,11 @@
-<div class="container">
+<h2>Projects</h2>
+<ul>
   @for (project of projectsSignal(); track project.id) {
-  <p>{{ project.name }}</p>
+  <li>
+    {{ project.name }} - {{ project.description }}
+    <button (click)="onDeleteProject(project.id)">Delete</button>
+  </li>
+  } @empty {
+  <li>No projects found.</li>
   }
-</div>
+</ul>

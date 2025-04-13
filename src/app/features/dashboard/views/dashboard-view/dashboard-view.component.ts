@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { SignOutButtonComponent } from '../../../auth/components/sign-out-button/sign-out-button.component';
-import { AddProjectButtonComponent } from '../../../projects/components/add-project/add-project-button.component';
+import { AddProjectButtonComponent } from '../../../projects/components/add-project-button/add-project-button.component';
 import { ProjectsListComponent } from '../../../projects/components/projects-list/projects-list.component';
 
 @Component({

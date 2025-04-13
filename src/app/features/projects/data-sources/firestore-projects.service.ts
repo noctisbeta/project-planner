@@ -8,6 +8,8 @@ import {
   addDoc,
   collection,
   collectionData,
+  deleteDoc, // Import deleteDoc
+  doc, // Import doc
   DocumentData,
   Firestore,
   serverTimestamp,
@@ -52,6 +54,17 @@ export class FirestoreProjectsService {
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
         })
+    );
+  }
+
+  async deleteProject(id: string): Promise<void> {
+    const projectDocRef = runInInjectionContext(this.injector, () =>
+      doc(this.firestore, this.projectsCollectionPath, id)
+    );
+
+    await runInInjectionContext(
+      this.injector,
+      async () => await deleteDoc(projectDocRef)
     );
   }
 }

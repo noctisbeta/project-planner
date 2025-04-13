@@ -21,4 +21,8 @@ export class ProjectsService {
   async addProject(data: CreateProjectData) {
     return await this.dataSource.createProject(data);
   }
+
+  async deleteProject(id: string): Promise<void> {
+    await this.dataSource.deleteProject(id);
+  }
 }

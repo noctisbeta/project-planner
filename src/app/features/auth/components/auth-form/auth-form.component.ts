@@ -1,11 +1,12 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal, WritableSignal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { GoogleButtonComponent } from '../google-button/google-button.component';
 
 @Component({
   selector: 'app-auth-form',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, GoogleButtonComponent],
   templateUrl: './auth-form.component.html',
   styleUrl: './auth-form.component.css',
 })
@@ -13,7 +14,7 @@ export class AuthFormComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
-  isSignIn: boolean = true;
+  isSignIn: WritableSignal<boolean> = signal(true);
 
   authForm = new FormGroup({
     email: new FormControl(''),
@@ -21,8 +22,12 @@ export class AuthFormComponent {
   });
 
   toggleAuthMode(): void {
-    this.isSignIn = !this.isSignIn;
+    this.isSignIn.set(!this.isSignIn());
   }
+
+  handleGoogleSignIn = async () => {
+    await this.authService.signInWithGoogle();
+  };
 
   async onSubmit(): Promise<void> {
     if (this.authForm.invalid) {
@@ -37,7 +42,7 @@ export class AuthFormComponent {
     }
 
     let result: boolean;
-    if (this.isSignIn) {
+    if (this.isSignIn()) {
       result = await this.authService.signIn(
         this.authForm.value.email!,
         this.authForm.value.password!

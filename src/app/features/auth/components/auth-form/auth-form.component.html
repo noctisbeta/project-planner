@@ -1,7 +1,7 @@
 <div class="container">
   <div class="titles">
     <h1>Welcome</h1>
-    @if (isSignIn) {
+    @if (isSignIn()) {
     <h2>Sign In</h2>
     } @else {
     <h2>Sign Up</h2>
@@ -23,8 +23,12 @@
     <button type="submit" [disabled]="authForm.invalid">Submit</button>
   </form>
 
+  <div class="social-container">
+    <app-google-button [isSignIn]="isSignIn()" [onTap]="handleGoogleSignIn" />
+  </div>
+
   <div class="auth-switch" (click)="toggleAuthMode()">
-    @if (isSignIn) {
+    @if (isSignIn()) {
     <p>Need an account? Sign up</p>
     } @else {
     <p>Already have an account? Sign in</p>

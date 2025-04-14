@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { FirebaseAuthService } from './../../firebase/firebase-auth.service';
+import { FirebaseAuthService } from './firebase-auth.service';
 
 @Injectable({
   providedIn: 'root',
@@ -11,6 +11,20 @@ export class AuthService {
 
   async isAuthenticated(): Promise<boolean> {
     return await this.firebaseAuthService.isAuthenticated();
+  }
+
+  async signInWithGoogle(): Promise<boolean> {
+    try {
+      const success = await this.firebaseAuthService.signInWithGoogle();
+
+      if (success) {
+        this.router.navigate(['/dashboard']);
+      }
+      return success;
+    } catch (error) {
+      console.error('Google Sign in error:', error);
+      return false;
+    }
   }
 
   async signUp(email: string, password: string): Promise<boolean> {

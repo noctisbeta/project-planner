@@ -8,14 +8,18 @@ import {
   addDoc,
   collection,
   collectionData,
-  deleteDoc, // Import deleteDoc
-  doc, // Import doc
+  CollectionReference,
+  deleteDoc,
+  doc,
   DocumentData,
   Firestore,
+  query,
   serverTimestamp,
+  where,
 } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { map, switchMap, tap } from 'rxjs/operators';
+import { FirebaseAuthService } from '../../auth/services/firebase-auth.service';
 import { CreateProjectData, Project } from '../models/project';
 
 @Injectable({
@@ -24,33 +28,69 @@ import { CreateProjectData, Project } from '../models/project';
 export class FirestoreProjectsService {
   private readonly firestore: Firestore = inject(Firestore);
   private readonly injector = inject(Injector);
+  private readonly firebaseAuthService = inject(FirebaseAuthService);
 
   private readonly projectsCollectionPath = 'projects';
-  private readonly projectsCollection = collection(
-    this.firestore,
-    this.projectsCollectionPath
-  );
+  private readonly projectsCollection: CollectionReference<DocumentData>;
 
   readonly projects$: Observable<Project[]>;
 
   constructor() {
-    this.projects$ = collectionData(this.projectsCollection, {
-      idField: 'id',
-    }).pipe(
-      map((docs) =>
-        docs.map((doc) =>
-          Project.fromData(doc as DocumentData & { id: string })
+    this.projectsCollection = collection(
+      this.firestore,
+      this.projectsCollectionPath
+    );
+
+    this.projects$ = this.firebaseAuthService.authState$.pipe(
+      tap((user) =>
+        console.log(
+          'FirestoreProjectsService: Auth state changed:',
+          user?.uid ?? 'null'
         )
-      )
+      ),
+      switchMap((user) => {
+        if (user) {
+          console.log(
+            `FirestoreProjectsService: User ${user.uid} logged in. Fetching projects...`
+          );
+          const userProjectsQuery = query(
+            this.projectsCollection,
+            where('userId', '==', user.uid)
+          );
+          return collectionData(userProjectsQuery, { idField: 'id' }).pipe(
+            map((docs) =>
+              docs.map((doc) =>
+                Project.fromData(doc as DocumentData & { id: string })
+              )
+            ),
+            tap((projects) =>
+              console.log(
+                `FirestoreProjectsService: Fetched ${projects.length} projects for user ${user.uid}`
+              )
+            )
+          );
+        } else {
+          console.log(
+            'FirestoreProjectsService: User logged out. Returning empty projects array.'
+          );
+          return of([]);
+        }
+      })
     );
   }
 
   async createProject(data: CreateProjectData): Promise<void> {
+    const currentUser = this.firebaseAuthService.auth.currentUser;
+    if (!currentUser) {
+      throw new Error('User must be logged in to create a project.');
+    }
+
     await runInInjectionContext(
       this.injector,
       async () =>
         await addDoc(this.projectsCollection, {
           ...data,
+          userId: currentUser.uid,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
         })

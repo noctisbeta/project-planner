@@ -16,6 +16,12 @@
     gap: 1rem;
   }
 
+  .social-container {
+    text-align: center;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+
   .auth-switch {
     text-decoration: underline;
     text-align: center;

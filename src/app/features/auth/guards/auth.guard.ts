@@ -6,8 +6,6 @@ export const authGuard: CanActivateFn = async (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  console.log('authGuard');
-
   const isAuthenticated = await authService.isAuthenticated();
 
   if (isAuthenticated) {
@@ -23,7 +21,7 @@ export const authGuard: CanActivateFn = async (route, state) => {
 export const noAuthGuard: CanActivateFn = async (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
-  console.log('noAuthGuard');
+
   const isAuthenticated = await authService.isAuthenticated();
 
   if (!isAuthenticated) {

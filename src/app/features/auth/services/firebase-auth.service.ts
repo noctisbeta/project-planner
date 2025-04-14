@@ -12,6 +12,7 @@ import {
   GoogleAuthProvider,
   signInWithEmailAndPassword,
   signInWithPopup,
+  user,
   User,
 } from '@angular/fire/auth';
 import { Observable } from 'rxjs';
@@ -19,10 +20,16 @@ import { AuthProvider } from '../interfaces/auth-provider';
 
 @Injectable({ providedIn: 'root' })
 export class FirebaseAuthService implements AuthProvider {
-  readonly auth: Auth = inject(Auth);
-  private readonly injector = inject(Injector);
+  private readonly auth: Auth = inject(Auth);
+  private readonly injector: Injector = inject(Injector);
 
   readonly authState$: Observable<User | null> = authState(this.auth);
+  readonly user$: Observable<User | null> = user(this.auth);
+
+  async getCurrentUser(): Promise<User | null> {
+    await this.auth.authStateReady();
+    return this.auth.currentUser;
+  }
 
   async signInWithGoogle(): Promise<boolean> {
     const provider = new GoogleAuthProvider();
@@ -68,7 +75,6 @@ export class FirebaseAuthService implements AuthProvider {
   }
 
   async isAuthenticated(): Promise<boolean> {
-    await this.auth.authStateReady();
-    return this.auth.currentUser !== null;
+    return this.getCurrentUser().then((user) => user !== null);
   }
 }

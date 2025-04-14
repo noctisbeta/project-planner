@@ -1,7 +1,7 @@
 <h2>Projects</h2>
 <ul>
   @for (project of projectsSignal(); track project.id) {
-  <li>
+  <li [class.pending]="project.isPending">
     {{ project.name }} - {{ project.description }}
     <button (click)="onDeleteProject(project.id)">Delete</button>
   </li>

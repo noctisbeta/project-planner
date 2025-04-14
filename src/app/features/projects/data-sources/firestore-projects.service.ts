@@ -7,20 +7,19 @@ import {
 import {
   addDoc,
   collection,
-  collectionData,
-  CollectionReference,
+  collectionSnapshots,
   deleteDoc,
   doc,
-  DocumentData,
   Firestore,
   query,
   serverTimestamp,
   where,
 } from '@angular/fire/firestore';
 import { Observable, of } from 'rxjs';
-import { map, switchMap, tap } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
 import { FirebaseAuthService } from '../../auth/services/firebase-auth.service';
-import { CreateProjectData, Project } from '../models/project';
+import { Project, WriteProjectData } from '../models/project';
+import { CreateProjectData } from './../models/project';
 
 @Injectable({
   providedIn: 'root',
@@ -31,75 +30,62 @@ export class FirestoreProjectsService {
   private readonly firebaseAuthService = inject(FirebaseAuthService);
 
   private readonly projectsCollectionPath = 'projects';
-  private readonly projectsCollection: CollectionReference<DocumentData>;
 
-  readonly projects$: Observable<Project[]>;
+  private readonly projectsCollection = collection(
+    this.firestore,
+    this.projectsCollectionPath
+  );
 
-  constructor() {
-    this.projectsCollection = collection(
-      this.firestore,
-      this.projectsCollectionPath
-    );
+  readonly projects$: Observable<Project[]> = this._initProjectsObservable();
 
-    this.projects$ = this.firebaseAuthService.authState$.pipe(
-      tap((user) =>
-        console.log(
-          'FirestoreProjectsService: Auth state changed:',
-          user?.uid ?? 'null'
-        )
-      ),
+  private _initProjectsObservable(): Observable<Project[]> {
+    return this.firebaseAuthService.authState$.pipe(
       switchMap((user) => {
-        if (user) {
-          console.log(
-            `FirestoreProjectsService: User ${user.uid} logged in. Fetching projects...`
-          );
-          const userProjectsQuery = query(
-            this.projectsCollection,
-            where('userId', '==', user.uid)
-          );
-          return collectionData(userProjectsQuery, { idField: 'id' }).pipe(
-            map((docs) =>
-              docs.map((doc) =>
-                Project.fromData(doc as DocumentData & { id: string })
-              )
-            ),
-            tap((projects) =>
-              console.log(
-                `FirestoreProjectsService: Fetched ${projects.length} projects for user ${user.uid}`
-              )
-            )
-          );
-        } else {
-          console.log(
-            'FirestoreProjectsService: User logged out. Returning empty projects array.'
-          );
+        if (!user) {
           return of([]);
         }
+
+        const userProjectsQuery = runInInjectionContext(this.injector, () =>
+          query(this.projectsCollection, where('userId', '==', user.uid))
+        );
+
+        const mappedSnapshots = runInInjectionContext(this.injector, () =>
+          collectionSnapshots(userProjectsQuery).pipe(
+            map((snapshots) =>
+              snapshots.map((snapshot) => Project.fromSnapshot(snapshot))
+            )
+          )
+        );
+
+        return mappedSnapshots;
       })
     );
   }
 
   async createProject(data: CreateProjectData): Promise<void> {
-    const currentUser = this.firebaseAuthService.auth.currentUser;
+    const currentUser = await this.firebaseAuthService.getCurrentUser();
+
     if (!currentUser) {
       throw new Error('User must be logged in to create a project.');
     }
 
+    const writeData: WriteProjectData = {
+      userId: currentUser.uid,
+      name: data.name,
+      description: data.description,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    };
+
     await runInInjectionContext(
       this.injector,
-      async () =>
-        await addDoc(this.projectsCollection, {
-          ...data,
-          userId: currentUser.uid,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-        })
+      async () => await addDoc(this.projectsCollection, writeData)
     );
   }
 
-  async deleteProject(id: string): Promise<void> {
+  async deleteProject(projectId: string): Promise<void> {
     const projectDocRef = runInInjectionContext(this.injector, () =>
-      doc(this.firestore, this.projectsCollectionPath, id)
+      doc(this.firestore, this.projectsCollectionPath, projectId)
     );
 
     await runInInjectionContext(

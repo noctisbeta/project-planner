@@ -1,8 +1,11 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject } from '@angular/core'; // Import ChangeDetectorRef
 import { ProjectsService } from '../../services/projects.service';
+// Import NgFor, NgIf, AsyncPipe etc. if NOT standalone and needed
+// import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-projects-list',
+  standalone: true, // Assuming standalone
   imports: [],
   templateUrl: './projects-list.component.html',
   styleUrl: './projects-list.component.css',

@@ -70,11 +70,6 @@
               "buildTarget": "project-planner:build:development"
             }
           },
-          "options": {
-            "headers": {
-              "Cross-Origin-Opener-Policy": "same-origin;same-origin-allow-popups"
-            }
-          },
           "defaultConfiguration": "development"
         },
         "extract-i18n": {

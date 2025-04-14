@@ -1,4 +1,4 @@
-<div class="container">
+<mat-card appearance="outlined" class="container">
   <div class="titles">
     <h1>Welcome</h1>
     @if (isSignIn()) {
@@ -9,23 +9,38 @@
   </div>
 
   <form class="form-container" [formGroup]="authForm" (ngSubmit)="onSubmit()">
-    <label for="email">Email</label>
-    <input type="text" id="email" name="email" formControlName="email" />
+    <mat-form-field>
+      <mat-label for="email">Email</mat-label>
+      <input
+        matInput
+        type="text"
+        id="email"
+        name="email"
+        formControlName="email"
+      />
+    </mat-form-field>
 
-    <label for="password">Password</label>
-    <input
-      type="password"
-      id="password"
-      name="password"
-      formControlName="password"
-    />
+    <mat-form-field>
+      <mat-label for="password">Password</mat-label>
+      <input
+        matInput
+        type="password"
+        id="password"
+        name="password"
+        formControlName="password"
+      />
+    </mat-form-field>
 
-    <button type="submit" [disabled]="authForm.invalid">Submit</button>
+    <button mat-raised-button type="submit" [disabled]="authForm.invalid">
+      Submit
+    </button>
   </form>
 
   <div class="social-container">
     <app-google-button [isSignIn]="isSignIn()" [onTap]="handleGoogleSignIn" />
   </div>
+
+  <mat-divider></mat-divider>
 
   <div class="auth-switch" (click)="toggleAuthMode()">
     @if (isSignIn()) {
@@ -34,4 +49,4 @@
     <p>Already have an account? Sign in</p>
     }
   </div>
-</div>
+</mat-card>
